@@ -6,22 +6,24 @@ on:
 jobs:
   format-code:
     runs-on: ubuntu-latest
+    timeout-minutes: 3
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          fetch-depth: 1
           ref: ${{ github.head_ref }}
 
-      - name: Run prettier
-        uses: docker://permafrostsoftware/prettier-docker-ga
+      - uses: oven-sh/setup-bun@v1
         with:
-          args: --config prettier.config.js *.js *.json *.yml ./src/* ./tests/*
+          bun-version: latest
 
-      - name: Run ESLint
-        uses: permafrost-dev/eslint-docker-ga@main
-        with:
-          args: --config .eslintrc.js --fix --ext ts,js ./src/**/* ./tests/**/*
+      - name: Install dependencies
+        run: bun install
+
+      - name: Format code
+        run: bun run fix
 
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v5
