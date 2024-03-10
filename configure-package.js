@@ -58,7 +58,7 @@ class Stdout {
 
 const stdout = new Stdout();
 
-const exists = async (path) => {
+const exists = async path => {
     try {
         await lstat(path);
         return true;
@@ -246,7 +246,7 @@ async function getGithubUsernameFromGitRemote() {
 }
 
 async function searchCommitsForGithubUsername() {
-    const authorName = (await gitCommand("config user.name")).trim().toLowerCase();
+    const authorName = (await gitCommand('config user.name')).trim().toLowerCase();
 
     const committers = (await gitCommand(`log --author='@users.noreply.github.com'  --pretty='%an:%ae' --reverse`))
         .split('\n')
@@ -365,31 +365,36 @@ const replaceVariablesInFile = async (filename, packageInfo, wl) => {
     }
 
     const relativeName = filename.replace(`${thisDir()}/`, '');
-    stdout.writeln(`${green("»")} processed ${white(relativeName)} ${green('✓')}`);
+    stdout.writeln(`${green('»')} processed ${white(relativeName)} ${green('✓')}`);
 };
 
 const filesToProcess = [];
 
 const preprocessFiles = async directory => {
-    const filelist = (await readdir(directory, { encoding: 'utf8', withFileTypes: false, recursive: true }));
+    const filelist = await readdir(directory, { encoding: 'utf8', withFileTypes: false, recursive: true });
 
-    const files = filelist.filter(f => {
-        return !f.includes('node_modules') && !f.includes('.git') && ![
-            '..',
-            '.git',
-            'assets',
-            'build.js',
-            'configure-package.js',
-            'node_modules',
-            'bun.lockb',
-            'package-lock.json',
-            'prettier.config.cjs',
-        ].includes(basename(f));
-    })
-    .filter(f => !f.includes('lock') && !f.includes('.log') && !f.includes('dist/'))
-    .filter(f => f.endsWith('.json') || f.endsWith('.md') || f.endsWith('.yml') || f.endsWith('.js') || f.endsWith('.ts') || f.endsWith('.cjs'));
+    const files = filelist
+        .filter(f => {
+            return (
+                !f.includes('node_modules') &&
+                !f.includes('.git') &&
+                ![
+                    '..',
+                    '.git',
+                    'assets',
+                    'build.js',
+                    'configure-package.js',
+                    'node_modules',
+                    'bun.lockb',
+                    'package-lock.json',
+                    'prettier.config.cjs',
+                ].includes(basename(f))
+            );
+        })
+        .filter(f => !f.includes('lock') && !f.includes('.log') && !f.includes('dist/'))
+        .filter(f => f.endsWith('.json') || f.endsWith('.md') || f.endsWith('.yml') || f.endsWith('.js') || f.endsWith('.ts') || f.endsWith('.cjs'));
 
-    for(const idx in files) {
+    for (const idx in files) {
         const fn = files[idx];
         const fqName = `${directory}/${fn}`;
 
@@ -492,7 +497,7 @@ class PackageFile {
         if (typeof this.pkg.scripts[name] !== 'undefined') {
             delete this.pkg.scripts[name];
         }
-        for(const key of Object.keys(this.pkg.scripts)) {
+        for (const key of Object.keys(this.pkg.scripts)) {
             if (this.pkg.scripts[key].includes(name)) {
                 delete this.pkg.scripts[key];
             }
@@ -506,7 +511,10 @@ class PackageFile {
         for (const key in this.pkg.scripts) {
             this.pkg.scripts[key] = this.pkg.scripts[key].replace(regex1, ' $2').trim();
             this.pkg.scripts[key] = this.pkg.scripts[key].replace(regex2, '').trim();
-            this.pkg.scripts[key] = this.pkg.scripts[key].split('&&').filter(cmd => !cmd.includes(name)).join('&&');
+            this.pkg.scripts[key] = this.pkg.scripts[key]
+                .split('&&')
+                .filter(cmd => !cmd.includes(name))
+                .join('&&');
             if (this.pkg.scripts[key].length === 0) {
                 delete this.pkg.scripts[key];
             }
@@ -580,7 +588,7 @@ class CallbackQueue {
         return this;
     }
     async run() {
-        while(this.queue.length > 0) {
+        while (this.queue.length > 0) {
             const cb = this.queue.shift();
             await cb();
         }
@@ -610,7 +618,7 @@ class Features {
         enabled: true,
         default: true,
         dependsOn: [],
-        disable: async ({remover}) => {
+        disable: async ({ remover }) => {
             remover.add(getWorkflowFilename('format-code'));
         },
     };
@@ -621,7 +629,7 @@ class Features {
         enabled: true,
         default: true,
         dependsOn: [],
-        disable: async ({remover}) => {
+        disable: async ({ remover }) => {
             remover.add(getGithubConfigFilename('dependabot'));
             await this.automerge.disable();
             this.automerge.enabled = false;
@@ -634,7 +642,7 @@ class Features {
         enabled: true,
         default: true,
         dependsOn: ['dependabot'],
-        disable: async ({remover}) => {
+        disable: async ({ remover }) => {
             remover.add(getWorkflowFilename('dependabot-auto-merge'));
         },
     };
@@ -645,7 +653,7 @@ class Features {
         enabled: true,
         default: true,
         dependsOn: [],
-        disable: async ({remover}) => {
+        disable: async ({ remover }) => {
             remover.add(getWorkflowFilename('codeql-analysis'));
         },
     };
@@ -655,7 +663,7 @@ class Features {
         prompt: 'Use Changelog Updater Workflow?',
         enabled: true,
         dependsOn: [],
-        disable: async ({remover}) => {
+        disable: async ({ remover }) => {
             await remover.add(getWorkflowFilename('update-changelog'));
         },
     };
@@ -666,7 +674,7 @@ class Features {
         enabled: true,
         dependsOn: [],
         disable: async ({ pkg, remover }) => {
-            pkg.removeDependencies('madge')
+            pkg.removeDependencies('madge');
             pkg.filterScripts('madge');
             remover.add(`${thisDir()}/.madgerc`);
         },
@@ -678,7 +686,7 @@ class Features {
         enabled: true,
         default: true,
         dependsOn: [],
-        disable: async ({pkg}) => {
+        disable: async ({ pkg }) => {
             pkg.removeDependencies('vitest', '@vitest/coverage-v8');
             pkg.replaceScript('test', 'echo "no tests defined" && exit 0');
         },
@@ -719,7 +727,7 @@ class Features {
         enabled: true,
         default: true,
         dependsOn: [],
-        disable: async ({pkg}) => {
+        disable: async ({ pkg }) => {
             pkg.removeDependencies('typedoc', 'typedoc-plugin-markdown');
             pkg.filterScripts('typedoc');
         },
@@ -773,7 +781,7 @@ async function getPackageManager() {
         npm: 'package-lock.json',
     };
 
-    for(const [name, fn] in Object.entries(managerMap)) {
+    for (const [name, fn] in Object.entries(managerMap)) {
         if (await exists(`${thisDir()}/${managerMap[fn]}`)) {
             return name;
         }
@@ -783,12 +791,7 @@ async function getPackageManager() {
 }
 
 async function promptForPackageManager() {
-    const names = [
-        'npm',
-        'yarn',
-        'bun',
-        'pnpm',
-    ];
+    const names = ['npm', 'yarn', 'bun', 'pnpm'];
 
     names.sort();
 
@@ -796,7 +799,7 @@ async function promptForPackageManager() {
 
     packageInfo.packageManager = '';
 
-    while(!names.includes(packageInfo.packageManager)) {
+    while (!names.includes(packageInfo.packageManager)) {
         if (packageInfo.packageManager.length > 0) {
             stdout.writeln(yellow(`» Invalid package manager, accepted values:${names.join(', ')}.`));
             packageInfo.packageManager = '';
@@ -817,7 +820,7 @@ async function run() {
 
     await promptForPackageManager();
     await populatePackageInfo();
-    await (new Features()).run(pkg, remover, cbqueue);
+    await new Features().run(pkg, remover, cbqueue);
 
     stdout.writeln('');
     const confirm = (await askQuestion(`${yellow('Process files')} (this will modify files) [Y/n]? `)).toString();
@@ -870,7 +873,7 @@ async function run() {
     } catch (err) {
         console.log('Error committing files: ', err);
     }
-};
+}
 
 run().then(() => {
     rl.close();
