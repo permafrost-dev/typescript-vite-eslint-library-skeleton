@@ -46,7 +46,7 @@
         "build:dev": "BUILD_ENV=development node ./scripts/build.js",
         "build:release": "BUILD_ENV=production node ./scripts/build.js",
         "fix": "npm run fmt && eslint --fix src",
-        "fmt": "prettier --config prettier.config.js --write 'src/**/*.{js,ts,json}' 'tests/**/*.{js,ts,json}' './*.{js,mjs,cjs,ts,json}'",
+        "fmt": "prettier --config prettier.config.cjs --write 'src/**/*.{js,ts,json}' 'tests/**/*.{js,ts,json}' './*.{js,mjs,cjs,ts,json}'",
         "lint:fix": "eslint --ext ts,js --fix src/",
         "lint:staged": "lint-staged",
         "lint": "eslint --ext ts,js src/",
