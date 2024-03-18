@@ -505,7 +505,7 @@ class PackageFile {
         return this;
     }
     filterScripts(name) {
-        const regex1 = new RegExp(`(&&\s+)${name.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}.*`, 'g');
+        const regex1 = new RegExp(`(&&\\s+)${name.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}.*`, 'g');
         const regex2 = new RegExp(`^${name.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}.*`, 'g');
 
         for (const key in this.pkg.scripts) {
